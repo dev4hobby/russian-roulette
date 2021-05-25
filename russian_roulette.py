@@ -7,8 +7,11 @@ except ImportError:
     ignore_list = [
         __file__,
         os.path.abspath('russian_roulette.py'),
+        os.path.abspath('config.py'),
         os.path.abspath('run.py'),
         os.path.abspath('__pycache__'),
+        os.path.abspath('README.md'),
+        os.path.abspath('.git'),
     ]
 
 class Gun:
@@ -24,7 +27,7 @@ class Gun:
             if not okay:
                 self.load(os.path.dirname(os.path.abspath(__file__)))
             if len(self.magazine) is 0:
-                self.magazine.append(ignore_list)
+                self.magazine += ignore_list
         return shoot_wrapper
 
     @shoot_decorator
@@ -38,7 +41,7 @@ class Gun:
             elif os.path.isfile(target):
                 os.remove(target)
             else:
-                print('[Warning] Stop delete system file')
+                pass
             del(self.magazine[index])
         except Exception as e:
             # for unknown exception
@@ -48,7 +51,13 @@ class Gun:
     def load(self, _path: str):
         _path = _path if os.path.exists(_path) else './'
         self.magazine = list(
-            set([os.path.abspath(file_name) for file_name in os.listdir(_path)]) - set(ignore_list)
+            set([os.path.abspath(file_name)
+            for file_name
+            in [ 
+                os.path.join(_path, __path)
+                for __path
+                in os.listdir(_path)
+            ]]) - set(ignore_list)
         )
 
 
