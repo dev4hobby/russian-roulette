@@ -4,6 +4,7 @@ if __name__ == '__main__':
     print(_g.bullet)
 
     # execute till you satisfying..
-    _g.shoot()
+    while not _g.broken:
+        _g.shoot()
 
-    
+print("g'bye")
