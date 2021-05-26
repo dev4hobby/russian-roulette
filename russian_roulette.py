@@ -1,8 +1,9 @@
 import os
 from shutil import rmtree
 from random import randint, shuffle
+
 try:
-    from config import ignore_list
+    from config import ignore_list, last_man_standing
 except ImportError:
     ignore_list = [
         __file__,
@@ -13,6 +14,9 @@ except ImportError:
         os.path.abspath('README.md'),
         os.path.abspath('.git'),
     ]
+    last_man_standing = False
+
+
 class Gun:
     magazine = list()
     safety_lock = False
@@ -22,15 +26,17 @@ class Gun:
         self.load(_path)
         print(self.__class__.__name__)
 
-    
     def shoot_decorator(shoot):
         def shoot_wrapper(self):
             okay = shoot(self)
             if not okay:
                 self.load(os.path.dirname(os.path.abspath(__file__)))
+
             if (len(self.magazine) is 0) and (self.safety_lock is False):
-                self.magazine += ignore_list
+                if last_man_standing:
+                    self.magazine += ignore_list
                 self.safety_lock = True
+
             if self.safety_lock and len(self.magazine) < 1:
                 self.broken = True
         return shoot_wrapper
@@ -59,32 +65,37 @@ class Gun:
 
     def load(self, _path: str):
         _path = _path if os.path.exists(_path) else './'
-        self.magazine = list(
-            set([os.path.abspath(file_name)
+
+        magazine = [
+            os.path.abspath(file_name)
             for file_name
-            in [ 
+            in [
                 os.path.join(_path, __path)
                 for __path
                 in os.listdir(_path)
-            ]]) - set(ignore_list)
-        )
+            ]]
+
+        if not last_man_standing:
+            magazine = list(set(magazine) - set(ignore_list))
+        self.magazine = magazine
 
 
 class Revolver(Gun):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-    
+
     def fanning(self):
         return self.shoot(times=6)
 
     def spin(self):
         shuffle(self.magazine)
         print('kreek-')
-        
+
+
 class AR(Gun):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-    
+
     def semi_auto(self):
         return self.shoot(times=9)
 
